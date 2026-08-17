@@ -16,7 +16,7 @@ _STYLES = """
 body { margin: 0 auto; max-width: 72rem; padding: 2rem; }
 code { background: color-mix(in srgb, currentColor 8%, transparent); padding: .1rem .3rem; }
 section.command { border-bottom: 1px solid color-mix(in srgb, currentColor 25%, transparent); margin-bottom: 2rem; }
-table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; width: max-content; }
+table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; width: max-content; font-size: 90%; }
 th, td { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); padding: .4rem .6rem; text-align: left; }
 th { background: color-mix(in srgb, currentColor 8%, transparent); }
 footer { font-size: .875rem; opacity: .75; text-align: center; }
