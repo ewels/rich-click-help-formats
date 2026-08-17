@@ -11,6 +11,7 @@ from rich.errors import MarkupError
 from rich.text import Text
 from rich_click.help_json import command_schema
 
+
 SCHEMA_DIRECTIVE = "# yaml-language-server: $schema=https://carapace.sh/schemas/command.json"
 
 
@@ -90,10 +91,11 @@ def _parameters(
 def _child_contexts(command: click.Command, ctx: click.Context) -> Iterator[tuple[str, click.Command, click.Context]]:
     """Yield each subcommand with a context suitable for help rendering."""
     list_commands = getattr(command, "list_commands", None)
-    if list_commands is None:
+    get_command = getattr(command, "get_command", None)
+    if list_commands is None or get_command is None:
         return
     for name in list_commands(ctx):
-        child = command.get_command(ctx, name)  # type: ignore[attr-defined]
+        child = get_command(ctx, name)
         if child is None:
             continue
         try:

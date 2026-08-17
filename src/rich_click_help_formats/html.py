@@ -9,6 +9,7 @@ from typing import Any
 import click
 from rich_click.help_json import command_schema
 
+
 _STYLES = """
 :root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.5; }
 body { margin: 0 auto; max-width: 72rem; padding: 2rem; }

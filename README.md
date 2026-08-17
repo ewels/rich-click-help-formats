@@ -1,5 +1,9 @@
 # rich-click-help-formats
 
+[![PyPI](https://img.shields.io/pypi/v/rich-click-help-formats?logo=pypi)](https://pypi.org/project/rich-click-help-formats/)
+[![Test and build](https://github.com/ewels/rich-click-help-formats/actions/workflows/pytest.yml/badge.svg)](https://github.com/ewels/rich-click-help-formats/actions/workflows/pytest.yml)
+[![Lint code](https://github.com/ewels/rich-click-help-formats/actions/workflows/prek.yml/badge.svg)](https://github.com/ewels/rich-click-help-formats/actions/workflows/prek.yml)
+
 `rich-click-help-formats` adds two optional output formats to every CLI that uses
 [rich-click](https://github.com/ewels/rich-click):
 
@@ -40,3 +44,7 @@ yaml = "my_help_formats.yaml:render"
 After installation, every rich-click CLI in that Python environment accepts `--help yaml`.
 
 Use a short, lowercase entry-point name. Use one entry point for each format. This structure keeps formats independent and makes new formats easy to add.
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the local setup and quality checks.
