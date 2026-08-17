@@ -4,7 +4,7 @@ requires = [ "setuptools>=77" ]
 
 [project]
 name = "rich-click-help-formats"
-description = "Optional Carapace and HTML help formats for rich-click"
+description = "Optional YAML, HTML, and Carapace help formats for rich-click"
 readme = "README.md"
 license = "MIT"
 authors = [ { name = "Phil Ewels", email = "phil@ewels.co.uk" } ]
@@ -31,6 +31,7 @@ urls.Issues = "https://github.com/ewels/rich-click-help-formats/issues"
 urls.Repository = "https://github.com/ewels/rich-click-help-formats"
 entry-points."rich_click.help_formats".carapace = "rich_click_help_formats.carapace:render"
 entry-points."rich_click.help_formats".html = "rich_click_help_formats.html:render"
+entry-points."rich_click.help_formats".yaml = "rich_click_help_formats.yaml:render"
 
 [dependency-groups]
 dev = [

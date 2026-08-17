@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from importlib.metadata import entry_points
+from pathlib import Path
 from typing import Any
 
 import click
@@ -12,11 +13,12 @@ from rich_click import RichCommand, argument, group, option
 from rich_click_help_formats.carapace import SCHEMA_DIRECTIVE
 from rich_click_help_formats.carapace import render as render_carapace
 from rich_click_help_formats.html import render as render_html
+from rich_click_help_formats.yaml import render as render_yaml
 
 
-def test_distribution_registers_both_formats() -> None:
+def test_distribution_registers_all_formats() -> None:
     registered = {entry_point.name for entry_point in entry_points(group="rich_click.help_formats")}
-    assert {"carapace", "html"} <= registered
+    assert {"carapace", "html", "yaml"} <= registered
 
 
 def test_installed_plugins_work_without_cli_changes(cli: RichCommand, runner: CliRunner) -> None:
@@ -28,9 +30,30 @@ def test_installed_plugins_work_without_cli_changes(cli: RichCommand, runner: Cl
     assert html.exit_code == 0
     assert html.output.startswith("<!doctype html>")
 
+    yaml_result = runner.invoke(cli, ["--help", "yaml"])
+    assert yaml_result.exit_code == 0
+    assert yaml.safe_load(yaml_result.output)["subcommands"]["create"]["name"] == "create"
+
     schema = json.loads(runner.invoke(cli, ["--help", "json"]).output)
     help_param = next(param for param in schema["params"] if param["name"] == "help")
-    assert help_param["choices"] == ["markdown", "json", "compact", "carapace", "html"]
+    assert help_param["choices"] == ["markdown", "json", "compact", "carapace", "html", "yaml"]
+
+
+def test_yaml_renders_full_tree(cli: RichCommand, context: Any) -> None:
+    schema = yaml.safe_load(render_yaml(cli, context))
+    assert schema["name"] == "example"
+    assert schema["subcommands"]["create"]["path"] == "example create"
+
+
+def test_yaml_converts_non_serializable_defaults(runner: CliRunner) -> None:
+    @group()
+    @option("--output", type=click.Path(path_type=Path), default=Path("output.txt"))
+    def cli(output: Path) -> None:
+        """Write a file."""
+
+    schema = yaml.safe_load(runner.invoke(cli, ["--help", "yaml"]).output)
+    output = next(param for param in schema["params"] if param["name"] == "output")
+    assert output["default"] == "output.txt"
 
 
 def test_carapace_renders_full_tree(cli: RichCommand, context: Any) -> None:
@@ -39,7 +62,7 @@ def test_carapace_renders_full_tree(cli: RichCommand, context: Any) -> None:
     schema = yaml.safe_load(output)
     assert schema["description"] == "Manage <widgets> & related records."
     assert schema["flags"]["--help?"] == "Show this message and exit."
-    assert schema["completion"]["flag"]["help"] == ["markdown", "json", "compact", "carapace", "html"]
+    assert schema["completion"]["flag"]["help"] == ["markdown", "json", "compact", "carapace", "html", "yaml"]
     assert schema["commands"][0]["name"] == "create"
     assert schema["commands"][0]["completion"]["flag"]["color"] == ["red", "blue"]
 
