@@ -4,29 +4,27 @@
 [![Test and build](https://github.com/ewels/rich-click-help-formats/actions/workflows/pytest.yml/badge.svg)](https://github.com/ewels/rich-click-help-formats/actions/workflows/pytest.yml)
 [![Lint code](https://github.com/ewels/rich-click-help-formats/actions/workflows/prek.yml/badge.svg)](https://github.com/ewels/rich-click-help-formats/actions/workflows/prek.yml)
 
-`rich-click-help-formats` adds optional output formats to every CLI that uses
-[rich-click](https://github.com/ewels/rich-click). The
-[rich-click structured-help documentation](https://ewels.github.io/rich-click/documentation/machine_readable_help/)
-describes the native formats.
+[`rich-click`](https://github.com/ewels/rich-click) is a Python library that tool developers use to make command-line tool output look nice, particularly `--help`. As of v1.10 it is [also able to produce](https://ewels.github.io/rich-click/documentation/machine_readable_help/) help output as markdown, json and a compact form for LLMs. `rich-click-help-formats` extends this functionality to add optional output formats:
 
-With this package installed, the available formats are:
+- `--help yaml` emits the complete command tree as YAML.
+- `--help html` emits a complete, standalone HTML help page.
+- `--help carapace` emits a complete [Carapace](https://carapace.sh) command specification as YAML.
 
-- **Native:** `--help markdown` emits the complete command tree as Markdown.
-- **Native:** `--help json` emits the complete command tree as JSON.
-- **Native:** `--help compact` emits concise text for coding agents.
-- **Plugin:** `--help yaml` emits the complete command tree as YAML.
-- **Plugin:** `--help html` emits a complete, standalone HTML help page.
-- **Plugin:** `--help carapace` emits a complete [Carapace](https://carapace.sh) command specification as YAML.
+This plugin can be used by tool developers or end users. When installed, these options will be available for any CLI you use that is built using `rich-click`.
+
+## Installation
 
 Install this package in the same Python environment as the CLI:
 
-```console
+```bash
 pip install rich-click-help-formats
 ```
 
-This package requires rich-click 1.10 or later. The CLI does not need a code change. rich-click discovers the formats through Python package entry points.
+This package requires rich-click 1.10 or later. The CLI itself does not need a code change. rich-click discovers the formats through Python package entry points.
 
-## Add another format
+## Contributions
+
+Controbutions are welcome. If you would like to add another format, please open a pull-request!
 
 Keep each renderer in a separate module. A renderer accepts the Click command and context. It returns the complete output as a string:
 
@@ -58,7 +56,5 @@ outline = "my_help_formats.outline:render"
 After installation, every rich-click CLI in that Python environment accepts `--help outline`.
 
 Use a short, lowercase entry-point name. Use one entry point for each format. This structure keeps formats independent and makes new formats easy to add.
-
-## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the local setup and quality checks.
