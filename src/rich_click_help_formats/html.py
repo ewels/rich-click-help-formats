@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from base64 import urlsafe_b64encode
+import re
+import unicodedata
 from html import escape
 from typing import Any
 
@@ -14,17 +15,19 @@ _STYLES = """
 :root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.5; }
 body { margin: 0 auto; max-width: 72rem; padding: 2rem; }
 code { background: color-mix(in srgb, currentColor 8%, transparent); padding: .1rem .3rem; }
-section.command { border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent); margin-top: 2rem; }
+section.command { border-bottom: 1px solid color-mix(in srgb, currentColor 25%, transparent); margin-bottom: 2rem; }
 table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; width: max-content; }
 th, td { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); padding: .4rem .6rem; text-align: left; }
 th { background: color-mix(in srgb, currentColor 8%, transparent); }
+footer { font-size: .875rem; opacity: .75; text-align: center; }
 """.strip()
 
 
 def _slug(path: str) -> str:
-    """Return a stable, collision-free HTML identifier for a command path."""
-    encoded = urlsafe_b64encode(path.encode()).decode().rstrip("=")
-    return f"command-{encoded or 'root'}"
+    """Return a readable HTML identifier based on a command path."""
+    ascii_path = unicodedata.normalize("NFKD", path).encode("ascii", "ignore").decode()
+    normalized = re.sub(r"[^a-z0-9]+", "-", ascii_path.lower()).strip("-")
+    return f"command-{normalized or 'root'}"
 
 
 def _code(value: Any) -> str:
@@ -102,7 +105,7 @@ def _help_paragraphs(value: Any) -> str:
 
 def _subcommand_link(name: str, schema: dict[str, Any]) -> str:
     """Render one subcommand index item."""
-    path = str(schema.get("path") or name)
+    path = str(schema.get("path") or schema.get("name") or name)
     summary = schema.get("short_help")
     description = f": {escape(str(summary))}" if summary else ""
     return f'<li><a href="#{escape(_slug(path))}">{_code(name)}</a>{description}</li>'
@@ -151,5 +154,6 @@ def render(command: click.Command, ctx: click.Context) -> str:
         '<html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{escape(str(title))}</title><style>{_STYLES}</style></head>"
-        f"<body>{_command_section(schema)}</body></html>\n"
+        f"<body>{_command_section(schema)}<footer>Generated using "
+        '<a href="https://github.com/ewels/rich-click">rich-click</a>.</footer></body></html>\n'
     )

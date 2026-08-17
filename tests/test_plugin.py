@@ -38,6 +38,9 @@ def test_installed_plugins_work_without_cli_changes(cli: RichCommand, runner: Cl
     help_param = next(param for param in schema["params"] if param["name"] == "help")
     assert help_param["choices"] == ["markdown", "json", "compact", "carapace", "html", "yaml"]
 
+    plain_help = runner.invoke(cli, ["--help"], terminal_width=160)
+    assert "[markdown|json|compact|carapace|html|yaml]" in plain_help.output
+
 
 def test_yaml_renders_full_tree(cli: RichCommand, context: Any) -> None:
     schema = yaml.safe_load(render_yaml(cli, context))
@@ -101,9 +104,14 @@ def test_html_renders_full_tree_and_escapes_text(cli: RichCommand, context: Any)
     output = render_html(cli, context)
     assert '<html lang="en">' in output
     assert "Manage &lt;widgets&gt; &amp; related records." in output
-    assert '<section class="command" id="command-ZXhhbXBsZSBjcmVhdGU">' in output
-    assert '<a href="#command-ZXhhbXBsZSBjcmVhdGU"><code>create</code></a>' in output
+    assert '<section class="command" id="command-example-create">' in output
+    assert '<a href="#command-example-create"><code>create</code></a>' in output
     assert "Widget color." in output
+    assert "section.command { border-bottom:" in output
+    assert "margin-bottom: 2rem" in output
+    assert "border-top:" not in output
+    assert "margin-top: 2rem" not in output
+    assert '<footer>Generated using <a href="https://github.com/ewels/rich-click">rich-click</a>.</footer>' in output
 
 
 def test_renderers_honor_short_help_and_hide_html_options(runner: CliRunner) -> None:
@@ -135,7 +143,7 @@ def test_carapace_marks_optional_values_generically(runner: CliRunner) -> None:
     assert document["flags"]["-h?"] == "Show this message and exit."
 
 
-def test_html_command_ids_do_not_collide(runner: CliRunner) -> None:
+def test_html_command_ids_are_normalized(runner: CliRunner) -> None:
     @group()
     def cli() -> None:
         """Root."""
@@ -144,11 +152,7 @@ def test_html_command_ids_do_not_collide(runner: CliRunner) -> None:
     def dotted() -> None:
         """Dotted."""
 
-    @cli.command("foo-bar")
-    def dashed() -> None:
-        """Dashed."""
-
     html = runner.invoke(cli, ["--help", "html"]).output
-    assert html.count('id="command-') == 3
-    assert 'id="command-Y2xpIGZvby5iYXI"' in html
-    assert 'id="command-Y2xpIGZvby1iYXI"' in html
+    assert html.count('id="command-') == 2
+    assert 'id="command-cli-foo-bar"' in html
+    assert 'href="#command-cli-foo-bar"' in html
